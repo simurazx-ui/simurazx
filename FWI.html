@@ -1,0 +1,735 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Personal AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --ai-primary: #4f46e5;
+            --ai-secondary: #10b981;
+            --ai-dark: #1f2937;
+            --ai-light: #f9fafb;
+            --ai-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        body {
+            background: var(--ai-light);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        .ai-header {
+            background: var(--ai-gradient);
+            color: white;
+            padding: 3rem 0;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 2rem;
+        }
+        
+        .chat-container {
+            max-height: 500px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .user-message {
+            background: var(--ai-primary);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 18px 18px 0 18px;
+            max-width: 70%;
+            margin-left: auto;
+        }
+        
+        .ai-message {
+            background: #f1f5f9;
+            color: var(--ai-dark);
+            padding: 12px 18px;
+            border-radius: 18px 18px 18px 0;
+            max-width: 70%;
+        }
+        
+        .ai-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--ai-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--ai-primary);
+            margin-bottom: 15px;
+        }
+        
+        .prediction-form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 10px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--ai-primary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="ai-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-4 fw-bold">
+                        <i class="fas fa-robot me-3"></i>
+                        My Personal AI Assistant
+                    </h1>
+                    <p class="lead">AI pribadi Anda yang bisa belajar dan berinteraksi melalui web</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="badge bg-light text-dark p-3">
+                        <i class="fas fa-bolt me-2"></i>
+                        <span id="aiStatus">Status: Online</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="row">
+            <!-- Chat Section -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-lg mb-4">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h4 class="mb-0">
+                            <i class="fas fa-comments me-2"></i>
+                            Chat with AI
+                        </h4>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="chat-container" id="chatContainer">
+                            <div class="message ai-message">
+                                <div class="d-flex align-items-center">
+                                    <div class="ai-avatar">
+                                        AI
+                                    </div>
+                                    <div>
+                                        <strong>MyPersonalAI:</strong>
+                                        <div>Halo! Saya AI pribadi Anda. Ada yang bisa saya bantu?</div>
+                                        <small class="text-muted">Ketik 'help' untuk melihat semua fitur</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-3 border-top">
+                            <div class="input-group">
+                                <input type="text" class="form-control form-control-lg" 
+                                       id="messageInput" placeholder="Ketik pesan Anda...">
+                                <button class="btn btn-primary btn-lg" onclick="sendMessage()">
+                                    <i class="fas fa-paper-plane"></i> Send
+                                </button>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    Contoh: "Halo", "Bagaimana kabarmu?", "Apa yang bisa kamu lakukan?"
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AI Features -->
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h5>Neural Network</h5>
+                            <p class="text-muted">Model AI dengan pembelajaran mendalam</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <h5>Natural Language</h5>
+                            <p class="text-muted">Memahami dan merespon percakapan</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h5>Prediction</h5>
+                            <p class="text-muted">Membuat prediksi dari data input</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar - AI Tools -->
+            <div class="col-lg-4">
+                <!-- AI Info -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-info-circle me-2"></i>
+                            AI Information
+                        </h5>
+                        <div id="aiInfo">
+                            Loading AI info...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prediction Tool -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-magic me-2"></i>
+                            Prediction Tool
+                        </h5>
+                        <div class="prediction-form">
+                            <div class="mb-3">
+                                <label class="form-label">Input Features (10 angka dipisahkan koma):</label>
+                                <input type="text" class="form-control" id="predictionInput" 
+                                       value="0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0">
+                            </div>
+                            <button class="btn btn-primary w-100" onclick="makePrediction()">
+                                <i class="fas fa-calculator me-2"></i>
+                                Make Prediction
+                            </button>
+                            <div class="mt-3" id="predictionResult"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Analysis -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-file-upload me-2"></i>
+                            Analyze Text File
+                        </h5>
+                        <div class="mb-3">
+                            <input type="file" class="form-control" id="fileInput" accept=".txt,.csv">
+                        </div>
+                        <button class="btn btn-outline-primary w-100" onclick="analyzeFile()">
+                            <i class="fas fa-search me-2"></i>
+                            Analyze Text
+                        </button>
+                        <div class="mt-3" id="fileAnalysisResult"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-white border-0">
+                        <h4 class="mb-0">
+                            <i class="fas fa-graduation-cap me-2"></i>
+                            Train Your AI
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Training Data (JSON format):</label>
+                                    <textarea class="form-control" id="trainingData" rows="5">
+[
+  {"data": [0.1, 0.2, 0.3], "label": 0},
+  {"data": [0.4, 0.5, 0.6], "label": 1},
+  {"data": [0.7, 0.8, 0.9], "label": 2}
+]
+                                    </textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Epochs:</label>
+                                    <input type="number" class="form-control" id="epochs" value="50" min="1" max="1000">
+                                </div>
+                                <button class="btn btn-success w-100" onclick="trainModel()">
+                                    <i class="fas fa-brain me-2"></i>
+                                    Start Training
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Training Progress</h6>
+                                <div class="progress mb-3" style="height: 20px;">
+                                    <div id="trainingProgress" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" style="width: 0%">0%</div>
+                                </div>
+                                <div id="trainingResults" class="mt-3">
+                                    <!-- Hasil training akan muncul di sini -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>My Personal AI</h5>
+                    <p>AI pribadi yang bisa dikustomisasi dan dipelajari.</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="mb-0">
+                        <i class="fas fa-code me-2"></i>
+                        Built with FastAPI, PyTorch, and ❤️
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:8000/redoc';
+        let chatHistory = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAIInfo();
+            setupEventListeners();
+        });
+        
+        function setupEventListeners() {
+            // Enter key untuk chat
+            document.getElementById('messageInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+        
+        // Load AI Information
+        async function loadAIInfo() {
+            try {
+                const response = await fetch(`${API_BASE}/ai/info`);
+                const data = await response.json();
+                
+                let html = `
+                    <div class="mb-2"><strong>Nama:</strong> ${data.ai_name}</div>
+                    <div class="mb-2"><strong>Versi:</strong> ${data.version}</div>
+                    <div class="mb-2"><strong>Model:</strong> ${data.model_type}</div>
+                    <div class="mb-2"><strong>Parameter:</strong> ${data.parameters_count.toLocaleString()}</div>
+                    <div class="mt-3">
+                        <h6>Kemampuan:</h6>
+                        <div class="d-flex flex-wrap gap-1">
+                `;
+                
+                data.capabilities.forEach(cap => {
+                    html += `<span class="badge bg-primary">${cap}</span>`;
+                });
+                
+                html += `</div></div>`;
+                
+                document.getElementById('aiInfo').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading AI info:', error);
+            }
+        }
+        
+        // Chat Functions
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Tambah pesan user ke chat
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Tampilkan typing indicator
+            showTypingIndicator();
+            
+            try {
+                const response = await fetch(`${API_BASE}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        user_id: 'web_user'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Hapus typing indicator
+                removeTypingIndicator();
+                
+                // Tambah response AI
+                if (data.success) {
+                    addMessage(data.response, 'ai');
+                } else {
+                    addMessage('Maaf, terjadi kesalahan.', 'ai');
+                }
+                
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage('Koneksi error. Coba lagi nanti.', 'ai');
+                console.error('Chat error:', error);
+            }
+        }
+        
+        function addMessage(text, sender) {
+            const container = document.getElementById('chatContainer');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="text-end">
+                        <div><strong>Anda:</strong></div>
+                        <div>${text}</div>
+                        <small class="text-muted">${new Date().toLocaleTimeString()}</small>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <div class="ai-avatar">
+                            AI
+                        </div>
+                        <div>
+                            <strong>MyPersonalAI:</strong>
+                            <div>${text}</div>
+                            <small class="text-muted">${new Date().toLocaleTimeString()}</small>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+            
+            // Simpan ke history
+            chatHistory.push({
+                sender: sender,
+                text: text,
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        function showTypingIndicator() {
+            const container = document.getElementById('chatContainer');
+            
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.className = 'message ai-message';
+            typingDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <div class="ai-avatar">
+                        AI
+                    </div>
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(typingDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+        
+        // Prediction Functions
+        async function makePrediction() {
+            const input = document.getElementById('predictionInput').value;
+            
+            try {
+                // Parse input menjadi array angka
+                const features = input.split(',').map(x => parseFloat(x.trim()));
+                
+                const response = await fetch(`${API_BASE}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ features: features })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `
+                        <div class="alert alert-success">
+                            <h6>Prediction Result:</h6>
+                            <div><strong>Predicted Class:</strong> ${data.predicted_class}</div>
+                            <div class="mt-2">
+                                <strong>Probabilities:</strong><br>
+                    `;
+                    
+                    data.probabilities.forEach((prob, idx) => {
+                        const percentage = (prob * 100).toFixed(2);
+                        html += `
+                            <div class="d-flex align-items-center mt-1">
+                                <div class="me-2">Class ${idx}:</div>
+                                <div class="progress flex-grow-1" style="height: 10px;">
+                                    <div class="progress-bar" role="progressbar" 
+                                         style="width: ${percentage}%">${percentage}%</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `</div></div>`;
+                    
+                    document.getElementById('predictionResult').innerHTML = html;
+                }
+                
+            } catch (error) {
+                document.getElementById('predictionResult').innerHTML = `
+                    <div class="alert alert-danger">
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // File Analysis
+        async function analyzeFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Pilih file terlebih dahulu!');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`${API_BASE}/analyze/text`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `
+                        <div class="alert alert-info">
+                            <h6>Analysis Result:</h6>
+                            <div><strong>File:</strong> ${data.filename}</div>
+                            <div><strong>Word Count:</strong> ${data.word_count}</div>
+                            <div><strong>Sentence Count:</strong> ${data.sentence_count}</div>
+                            <div><strong>Character Count:</strong> ${data.character_count}</div>
+                            <div><strong>Average Word Length:</strong> ${data.avg_word_length.toFixed(2)}</div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('fileAnalysisResult').innerHTML = html;
+                }
+                
+            } catch (error) {
+                console.error('File analysis error:', error);
+            }
+        }
+        
+        // Training Functions
+        async function trainModel() {
+            const trainingData = document.getElementById('trainingData').value;
+            const epochs = parseInt(document.getElementById('epochs').value);
+            
+            try {
+                const data = JSON.parse(trainingData);
+                
+                // Extract features and labels
+                const features = data.map(item => item.data);
+                const labels = data.map(item => item.label);
+                
+                // Update progress bar
+                const progressBar = document.getElementById('trainingProgress');
+                progressBar.style.width = '0%';
+                progressBar.textContent = '0%';
+                
+                // Start training
+                const response = await fetch(`${API_BASE}/train`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        data: features,
+                        labels: labels,
+                        epochs: epochs
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update progress bar
+                    progressBar.style.width = '100%';
+                    progressBar.textContent = '100%';
+                    progressBar.classList.remove('progress-bar-animated');
+                    
+                    // Show results
+                    let html = `
+                        <div class="alert alert-success">
+                            <h6>Training Complete!</h6>
+                            <div><strong>Epochs:</strong> ${result.epochs_trained}</div>
+                            <div><strong>Final Loss:</strong> ${result.final_loss.toFixed(6)}</div>
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        onclick="showLossChart(${JSON.stringify(result.loss_history)})">
+                                    Show Loss Chart
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('trainingResults').innerHTML = html;
+                }
+                
+            } catch (error) {
+                document.getElementById('trainingResults').innerHTML = `
+                    <div class="alert alert-danger">
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        function showLossChart(lossHistory) {
+            // Simple chart using Unicode characters
+            let chart = '<pre class="bg-light p-3">\n';
+            chart += 'Loss History Chart:\n\n';
+            
+            const maxLoss = Math.max(...lossHistory);
+            const chartHeight = 10;
+            
+            for (let i = 0; i < chartHeight; i++) {
+                let line = '';
+                const threshold = maxLoss * (1 - i / chartHeight);
+                
+                for (let loss of lossHistory) {
+                    line += loss >= threshold ? '█' : ' ';
+                }
+                
+                chart += line + '\n';
+            }
+            
+            // X-axis
+            chart += '─'.repeat(lossHistory.length) + '\n';
+            
+            // Labels
+            const labels = [];
+            for (let i = 0; i < lossHistory.length; i += Math.floor(lossHistory.length / 10)) {
+                labels.push(i);
+            }
+            
+            let labelLine = '';
+            for (let i = 0; i < lossHistory.length; i++) {
+                if (labels.includes(i)) {
+                    labelLine += '|';
+                } else {
+                    labelLine += ' ';
+                }
+            }
+            chart += labelLine + '\n';
+            
+            chart += '</pre>';
+            
+            document.getElementById('trainingResults').innerHTML += chart;
+        }
+    </script>
+</body>
+</html>
